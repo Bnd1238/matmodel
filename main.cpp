@@ -42,6 +42,8 @@ double RK45(double x, double (*f)(double), double h)
 
 double Trapeze(double x, double (*f)(double), double h)
 {
+	if (f(x) ==0)
+		return 0;
 	return h * f(x) + h * h / 4 * -1 / (2 * f(x)) * f(x);
 }
 
@@ -58,9 +60,11 @@ int main()
 	{
 		//cout << setprecision(20) << abs(Purpose(50, t) - RK) << endl;;
 		//cout  << setprecision(5) << Purpose(50, t) << " " << " " << E <<" "<<T <<endl;
-		cout << setprecision(3) <<"Time:"<< t<<" RK:"<<RK <<" Trapeze:"<<T<<" Target:"<<Target(50,t)<<endl;
+		cout << setprecision(5) <<"Time:"<< t<<" RK:"<<RK <<" Trapeze:"<<T<<" Target:"<<Target(50,t)<<endl;
 		RK = RK + RK45(RK, Law, h);
 		T = T + Trapeze(T,Law,h);
+		if (T <= 0)
+			T = 0;
 	}
 	return 0;
 }

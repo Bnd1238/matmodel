@@ -60,7 +60,7 @@ int main()
 	{
 		//cout << setprecision(20) << abs(Purpose(50, t) - RK) << endl;;
 		//cout  << setprecision(5) << Purpose(50, t) << " " << " " << E <<" "<<T <<endl;
-		cout << setprecision(5) <<"Time:"<< t<<" RK:"<<RK <<" Trapeze:"<<T<<" Target:"<<Target(50,t)<<endl;
+		cout << setprecision(5) <<"Time:"<< t<<" RK45:"<<RK <<" Trapeze:"<<T<<" Target:"<<Target(50,t)<<endl;
 		RK = RK + RK45(RK, Law, h);
 		T = T + Trapeze(T,Law,h);
 		if (T <= 0)

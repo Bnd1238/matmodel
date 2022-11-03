@@ -51,7 +51,7 @@ double Trapeze(double x, double (*f)(double), double h)
 int main()
 {
 	//freopen("a.txt", "w", stdout);
-	double h = 1;
+	double h = 0.1;
 	double E = 50;
 	double RK = E;
 	double T = E;

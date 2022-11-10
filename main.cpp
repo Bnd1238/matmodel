@@ -107,7 +107,7 @@ double Adams(double h,int n)
 }
 int main()
 {
-	//freopen("a.txt", "w", stdout);
+	freopen("a.txt", "w", stdout);
 	double h = 0.01;
 	double E = 50;
 	double RK = E;

@@ -54,7 +54,8 @@ double Trapeze(double x, double (*f)(double), double h)//Метод неявно
 	return h * f(x) + h * h / 4 * -1 / (2 * f(x)) * f(x);
 }
 
-vector<double>start;
+vector<double>startF;
+vector<double>startX;
 vector<double>gamma
 {
 	1.0,						//0
@@ -78,22 +79,26 @@ double sup(int i, int n)//конечные разности
 void starter(double E, double h)//разгон методом неявной трапеции
 {
 	double T = E;
+	double time = 0;
 	for (int i = 0; i < 11; ++i)
 	{
-		start.push_back(T);
-		T = T + Trapeze(T, Law, h);
+		startF.push_back(Target(E,time));
+		startX.push_back(time);
+		time += h;
 	}
 }
 void Adams(double h)//Метод Адамса-Башфорта 11 порядка
 {
 	double sum = 0;
-	int siz = start.size() - 1;
+	int siz = startX.size() - 1;
 	for (int i = 0; i < 11; ++i)
 	{
 		sum =sum+ gamma[i] * sup(i,siz);
 	}
-	start.push_back(start[siz] +  h*sum);
+	startX.push_back(startX[siz] +  h*sum);
+	startF.push_back(startF[siz]+Law(startX[siz] + h * sum));
 }
+
 
 
 double Sopt( double h,double E,double tol)// поиск оптимального шага
@@ -145,9 +150,10 @@ int main()
 	}
 	fout.close();*/
 	starter(E, h);
-	for(int i=0;i<20;++i)
+	for(int i=0;i<100;++i)
 		Adams(h);
-	for (int i = 0; i < start.size(); ++i)
-		cout << start[i] << endl;
+	double t = 0;
+	for (int i = 0; i < startF.size(); ++i,t+=h)
+		cout <<t<<" "<< startF[i] << endl;
 	return 0;
 }

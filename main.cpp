@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <stdio.h>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 double Law(double x)
@@ -12,7 +13,7 @@ double Law(double x)
 	return 0;
 }
 
-double Target(double x0, double t)
+double Target(double x0, double t)//Аналитическое решение
 {
 	if (0 <= t && t < 2 * sqrt(x0))
 	{
@@ -20,7 +21,7 @@ double Target(double x0, double t)
 	}
 	return 0;
 }
-double RK44(double x, double (*f)(double), double h)
+double RK44(double x, double (*f)(double), double h)//Вложенный метод Рунге-Кутты 4(5)
 {
 	if (f(x) == 0)
 		return 0;
@@ -33,7 +34,7 @@ double RK44(double x, double (*f)(double), double h)
 
 	return h * k1 * 25 / 216 + h * 1408 / 2565 * k3 + h * 2197 / 4104 * k4 - h * 1 / 5 * k5;
 }
-double RK45(double x, double (*f)(double), double h)
+double err(double x, double (*f)(double), double h,double tol)//Нахождение ошибки с помощью RK4(5)
 {
 	if (f(x) == 0)
 		return 0;
@@ -44,9 +45,9 @@ double RK45(double x, double (*f)(double), double h)
 	double k5 = f(x + h * (439 / 216 * k1 - 8 * k2 + 3680 / 513 * k3 - 845 / 4104 * k4));
 	double k6 = f(x + h * (-8 / 27 * k1 + 2 * k2 - 3544 / 2565 * k3 + 1859 / 4104 * k4 - 11 / 40 * k5));
 
-	return h * k1 * 16 / 135 + h * 6656 / 12825 * k3 + h * 28561 / 56430 * k4 - h * 9 / 50 * k5+ h * 2/55*k6;
+	return  pow(h * k1 * (25 / 216 - 16 / 135)/tol + h * (1408 / 2565 - 6656 / 12825) * k3/tol + h * (2197 / 4104 - 28561 / 56430) * k4/tol - h * (1 / 5 - 9 / 50) * k5/tol - h * 2 / 55 * k6/tol,2);
 }
-double Trapeze(double x, double (*f)(double), double h)
+double Trapeze(double x, double (*f)(double), double h)//Метод неявной тапеции
 {
 	if (f(x) ==0)
 		return 0;
@@ -56,85 +57,97 @@ double Trapeze(double x, double (*f)(double), double h)
 vector<double>start;
 vector<double>gamma
 {
-	1.0,
-	0.5 ,
-	5.0 / 12.0,
-	3.0 / 8.0,
-	251.0 / 720.0,
-	95.0 / 288.0,
-	19087.0 / 60480.0,
-	5257.0 / 17280.0,
-	1070017.0 / 3628800.0,
-	25713.0 / 89600.0,
-	26842253.0 / 95800320.0 ,
+	1.0,						//0
+	0.5 ,						//1
+	5.0 / 12.0,					//2
+	3.0 / 8.0,					//3
+	251.0 / 720.0,				//4
+	95.0 / 288.0,				//5
+	19087.0 / 60480.0,			//6
+	5257.0 / 17280.0,			//7
+	1070017.0 / 3628800.0,		//8
+	25713.0 / 89600.0,			//9
+	26842253.0 / 95800320.0 ,	//10
 };
-double sup(int i,int n)
+double sup(int i, int n)//конечные разности
 {
-	switch (i)
+	if (i == 0)
+		return start[n];
+	return sup(i - 1, n) - sup(i - 1, n - 1);
+}
+void starter(double E, double h)//разгон методом неявной трапеции
+{
+	double T = E;
+	for (int i = 0; i < 11; ++i)
 	{
-		case(0):
-			return start[n];
-		case(1):
-			return start[n]- start[n-1];
-		case(2):
-			return start[n]-2* start[n-1]+ start[n-2];
-		case(3):
-			return start[n]-3* start[n-1]+3* start[n-2]- start[n-3];
-		case(4):
-			return start[n] - 4 * start[n - 1] + 6 * start[n - 2] - 4 * start[n - 3] + start[n - 4];
-		case(5):
-			return start[n] - 5 * start[n - 1] + 10 * start[n - 2] - 10 * start[n - 3] +5* start[n - 4]- start[n-5];
-		case(6):
-			return start[n] - 6 * start[n - 1] + 15 * start[n - 2] - 20 * start[n - 3] + 15 * start[n - 4] - 6* start[n - 5]+ start[n-6];
-		case(7):
-			return start[n] - 7 * start[n - 1] + 21 * start[n - 2] - 35 * start[n - 3] + 35 * start[n - 4] -21* start[n - 5]+7* start[n-6]- start[n-7];
-		case(8):
-			return start[n] - 8 * start[n - 1] + 28 * start[n - 2] - 56 * start[n - 3] + 70 * start[n - 4] - 56 * start[n - 5] + 28 * start[n - 6] -8* start[n - 7]+ start[n-8];
-		case(9):
-			return start[n] - 9 * start[n - 1] + 36 * start[n - 2] - 84 * start[n - 3] + 120 * start[n - 4] - 126 * start[n - 5] +84 * start[n - 6] - 36 * start[n - 7] +9* start[n - 8]- start[n-9];
+		start.push_back(T);
+		T = T + Trapeze(T, Law, h);
 	}
 }
-
-double Adams(double h,int n)
+void Adams(double h)//Метод Адамса-Башфорта 11 порядка
 {
 	double sum = 0;
-	for (int i = 0; i < 10; ++i)
+	int siz = start.size() - 1;
+	for (int i = 0; i < 11; ++i)
 	{
-		sum = sum + gamma[i] * sup(i,n);
+		sum =sum+ gamma[i] * sup(i,siz);
 	}
-	start.push_back(start[n] + h * sum);
-	return h * sum;
+	start.push_back(start[siz] +  h*sum);
 }
+
+
+double Sopt( double h,double E,double tol)// поиск оптимального шага
+{
+	double RK = E;
+	double error = 0;
+	int m = 0;
+	double Hopt = 0;
+	for (double t = 0; Target(E, t) > 0 && RK > 0; t += h) 
+	{
+		RK = RK + RK44(RK, Law, h);
+		error += err(RK, Law, h, tol);
+		++m;
+	}
+	error = sqrt(error / m);
+	return h * pow((1 / error), 1.0 / 5.0);
+}
+
 int main()
 {
-	freopen("a.txt", "w", stdout);
-	double h = 0.01;
+	//freopen("a.txt", "w", stdout);
+	double h = 0.1;
 	double E = 50;
 	double RK = E;
 	double T = E;
-	double P = E;
-	double A = E;
-	for (int i = 0; i < 11; ++i)
+	double Hopt = h;
+
+	/*ofstream fout;
+
+	fout.open("a.txt");
+	for (double t = 0; Target(E, t) > 0 && T > 0; t += Hopt) //вывод со старым шагом
 	{
-		start.push_back(Target(50, h * i));
+		RK = RK + RK44(RK, Law, h);
+		fout << t << " " << setprecision(6) << abs(RK - Target(E, t)) << endl;
 	}
-	double n = 10;
-	for (double t = 0; t < 5; t = t + h)
+	fout.close();*/
+
+	for (int i = 0; i < 100; ++i) //????????С каждой итерациией уточняется оптимальный шаг
 	{
-		Adams(h, n);
-		n++;
+		Hopt = Sopt(Hopt, E, 0.001);
 	}
-	n = 0;
-	for (double t = 0; t<5; t = t + h)
+	/*RK = E;
+
+	fout.open("b.txt");
+	for (double t = 0; Target(E, t) > 0 && T > 0; t += Hopt) //вывод с новым шагом
 	{
-		cout <<t<<" "<< setprecision(5) <<T<<" "<< RK<<" "<<start[n]<<" "<<Target(50,t) << " "<<endl;
-		RK = RK + RK45(RK, Law, h);
-		T = T + Trapeze(T, Law, h);
-		n++;
-		if (T <= 0)
-			T = 0;
-		if (RK <= 0)
-			RK = 0;
+		RK = RK + RK44(RK, Law, Hopt);
+		fout << t << " " << setprecision(6) << abs(RK - Target(E, t))<< endl;
 	}
+	fout.close();*/
+	starter(E, h);
+	for(int i=0;i<20;++i)
+		Adams(h);
+	for (int i = 0; i < start.size(); ++i)
+		cout << start[i] << endl;
 	return 0;
 }

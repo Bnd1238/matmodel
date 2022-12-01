@@ -82,8 +82,10 @@ void starter(double E, double h)//разгон методом неявной т�
 	double time = 0;
 	for (int i = 0; i < 11; ++i)
 	{
-		startF.push_back(Target(E,time));
+		startF.push_back(T);
 		startX.push_back(time);
+		
+		T=T+Trapeze(T,Law,h);
 		time += h;
 	}
 }

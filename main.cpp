@@ -147,8 +147,8 @@ int main()
 	double A = E;
 	for (double t = 0; Target(E, t) > 0; t += h)
 	{
-		cout << t << setprecision(20) << " " << abs((Target(E, t) - RK)) << " " << abs((Target(E, t) - T)) << endl;
-		T = RK44(T,0.000000001);
+		cout << t << setprecision(8) << " " << abs((Target(E, t) - RK)) << " " << abs((Target(E, t) - T)) << endl;
+		T = RK44(T,0.0001);
 		RK = RK4(RK);
 	}
 	return 0;

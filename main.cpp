@@ -211,35 +211,6 @@ int main()
 		cout <<"tolerance="<< tol;
 		break;
 	}
-	//freopen("a.txt", "w", stdout);
 	
-	//cout << "---------------------" << endl;
-	/*for (long long i = 100; !check; ++i)
-	{
-		T = E;
-		h = h / 2;
-		starter(E);
-		for (double t = 0; Target(E, t) > 1; t += h)
-		{
-			if (abs(Target(E, t) - T) / Target(E, t) > 1e-6)
-			{
-				check = 0;
-				break;
-			}
-			else
-			{
-				T = Adams(T);
-				check = 1;
-			}
-		}
-	}*/
-	/*cout << "calls=" << E / h;
-	T = E;
-	starter(E);
-	for (double t = 0; Target(E, t) > 1; t += h)
-	{
-		cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
-		T = Adams(T);
-	}*/
 	return 0;
 }

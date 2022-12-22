@@ -129,7 +129,7 @@ double Adams(double x)//Метод Адамса-Башфорта 11-ого по�
 
 int main()
 {
-	
+	long long calls = 0;
 	h = 2;
 	double E = 64;
 	double RK = E;
@@ -165,7 +165,14 @@ int main()
 				}
 			}
 		}
-		cout <<"calls="<< E / h;
+		T = E;
+		for (double t = 0; Target(E, t) > 1; t += h)
+		{
+			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
+			T = RK4(T);
+			calls++;
+		}
+		cout <<"calls="<<calls;
 		break;
 	case(2):
 		for (long long i = 10; !check; ++i)
@@ -186,7 +193,14 @@ int main()
 				}
 			}
 		}
-		cout << "calls=" << E / h;
+		T = E;
+		for (double t = 0; Target(E, t) > 1; t += h)
+		{
+			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
+			T = Trapeze(T);
+			calls++;
+		}
+		cout << "calls=" << calls;
 		break;
 	case(3):
 		for (long long i = 10; !check; ++i)
@@ -208,9 +222,13 @@ int main()
 			}
 		}
 		T = E;
+		for (double t = 0; Target(E, t) > 1; t += h)
+		{
+			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
+			T = RK44(T,tol);
+		}
 		cout <<"tolerance="<< tol;
 		break;
 	}
-	
 	return 0;
 }

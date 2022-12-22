@@ -226,8 +226,9 @@ int main()
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
 			T = RK44(T,tol);
+			calls++;
 		}
-		cout <<"tolerance="<< tol;
+		cout <<"tolerance="<< tol<<" "<<"calls:"<<calls;
 		break;
 	}
 	return 0;

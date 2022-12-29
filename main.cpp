@@ -43,20 +43,20 @@ double err(double x)//Нахождение ошибки с помощью RK4(5)
 	double k5 = f(x + h * (439.0 / 216.0 * k1 - 8.0 * k2 + 3680.0 / 513.0 * k3 - 845.0 / 4104.0 * k4));
 	double k6 = f(x + h * (-8.0 / 27.0 * k1 + 2.0 * k2 - 3544.0 / 2565.0 * k3 + 1859.0 / 4104.0 * k4 - 11.0 / 40.0 * k5));
 
-	return  h * k1 * (16.0 / 135.0-25.0 / 216.0 ) + h * (6656.0 / 12825.0-1408.0 / 2565.0 ) * k3 + h * (28561.0 / 56430.0 -2197.0 / 4104.0 ) * k4 - h * (9.0 / 50.0-1.0 / 5.0 ) * k5 - h * 2.0 / 55.0 * k6;
+	return  h * k1 * (16.0 / 135.0 - 25.0 / 216.0) + h * (6656.0 / 12825.0 - 1408.0 / 2565.0) * k3 + h * (28561.0 / 56430.0 - 2197.0 / 4104.0) * k4 - h * (9.0 / 50.0 - 1.0 / 5.0) * k5 - h * 2.0 / 55.0 * k6;
 }
-void Hopt(double E,double tol)// поиск оптимального шага
+void Hopt(double E, double tol)// поиск оптимального шага
 {
-	
+
 	double error = err(E);
 	if (abs(error) < tol)
 		return;
 	error = abs(error / tol);
 	h = h * pow(1 / error, 5);
-	
-	Hopt(E,tol);
+
+	Hopt(E, tol);
 }
-double RK44(double x,double tol)//Вложенный метод Рунге-Кутты 4(5)
+double RK44(double x, double tol)//Вложенный метод Рунге-Кутты 4(5)
 {
 	Hopt(x, tol);
 	double error = err(x);
@@ -71,18 +71,18 @@ double RK44(double x,double tol)//Вложенный метод Рунге-Ку�
 	double k5 = f(x + h * (439.0 / 216.0 * k1 - 8.0 * k2 + 3680.0 / 513.0 * k3 - 845.0 / 4104.0 * k4));
 	double k6 = f(x + h * (-8.0 / 27.0 * k1 + 2.0 * k2 - 3544.0 / 2565.0 * k3 + 1859.0 / 4104.0 * k4 - 11.0 / 40.0 * k5));
 
-	return x + h * k1 * 16.0 / 135.0 + h * 6656.0 / 12825.0 * k3 + h * 28561.0 / 56430.0 * k4 - h * 9.0 / 50.0 * k5+h* 2.0 / 55.0 *k6;
+	return x + h * k1 * 16.0 / 135.0 + h * 6656.0 / 12825.0 * k3 + h * 28561.0 / 56430.0 * k4 - h * 9.0 / 50.0 * k5 + h * 2.0 / 55.0 * k6;
 }
 
 double Trapeze(double x)//Метод неявной тапеции
 {
 	if (f(x) == 0)
 		return 0;
-	return x+h * f(x) + h * h / 4 * -1 / (2 * f(x)) * f(x);
+	return x + h * f(x) + h * h / 4 * -1 / (2 * f(x)) * f(x);
 }
 
 vector<double>startF;
-vector<double>gamma
+double gamma[]=
 {
 	1.0,						//0
 	0.5 ,						//1
@@ -109,6 +109,7 @@ void starter(double E)//разгон методом Рунге-Кутты 4
 	double rk = E;
 	for (int i = 0; i < 11; ++i)
 	{
+		//cout << setprecision(8) << time << " " << Target(E, time) << " " << rk << endl;
 		startF.push_back(f(rk));
 		rk = RK4(rk);
 		time += h;
@@ -140,7 +141,7 @@ int main()
 	bool check = 0;
 	double tol = 1;
 	double mis = 1e-6;
-	cout << "RK4:1\nTrapeze:2\nRK4(5):3\n";
+	cout << "RK4:1\nTrapeze:2\nRK4(5):3\nAB11:4\n";
 	int n;
 	cin >> n;
 	//freopen("a.txt", "w", stdout);
@@ -172,64 +173,49 @@ int main()
 			T = RK4(T);
 			calls++;
 		}
-		cout <<"calls="<<calls;
+		cout << "calls=" << calls;
 		break;
 	case(2):
-		for (long long i = 10; !check; ++i)
-		{
-			T = E;
-			h = E / double(i);
-			for (double t = 0; Target(E, t) > 1; t += h)
-			{
-				if (abs(Target(E, t) - T) / Target(E, t) > 0.01)
-				{
-					check = 0;
-					break;
-				}
-				else
-				{
-					T = Trapeze(T);
-					check = 1;
-				}
-			}
-		}
+		h = 0.00001;
 		T = E;
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
-			T = Trapeze(T);
+			T =Trapeze(T);
 			calls++;
 		}
 		cout << "calls=" << calls;
 		break;
 	case(3):
-		for (long long i = 10; !check; ++i)
-		{
-			T = E;
-			tol = tol/2;
-			for (double t = 0; Target(E, t) > 1; t += h)
-			{
-				if (abs(Target(E, t) - T) / Target(E, t) > mis)
-				{
-					check = 0;
-					break;
-				}
-				else
-				{
-					T = RK44(T,tol);
-					check = 1;
-				}
-			}
-		}
+		tol = 0.1;
 		T = E;
+		h = 2;
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
-			T = RK44(T,tol);
+			T = RK44(T, tol);
 			calls++;
 		}
-		cout <<"tolerance="<< tol<<" "<<"calls:"<<calls;
+		cout << "calls=" << calls<<" tol="<<tol;
 		break;
+	case (4):
+		h = 0.0001;
+		starter(E);
+		/*for (double t = 0; Target(E, t) > 1; t += h)
+		{
+			cout << setprecision(8) << " " << t << " " << Target(E,t)<<" "<<T << endl;
+			T = Adams(T);
+			calls++;
+		}*/
+		T = E;
+		h = 0.01;
+		for (double t = 0; Target(E, t) > 1; t += h)
+		{
+			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
+			T = Adams(T);
+			calls++;
+		}
+		cout << "calls:" << calls+10;
 	}
 	return 0;
 }

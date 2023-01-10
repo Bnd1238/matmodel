@@ -11,7 +11,7 @@ double E = 64;
 double RK = E;
 double T = E;
 
-
+double Rtol = 5e-8;
 double f(double x)
 {
 	if (x >= 0)
@@ -42,7 +42,7 @@ double Trapeze(double x)//Метод неявной тапеции
 	return x + h * f(x + h / 2.0 * f(x));
 }
 
-double RK44(double x, double tol)//Вложенный метод Рунге-Кутты 4(5)
+double RK44(double x)//Вложенный метод Рунге-Кутты 4(5)
 {
 	bool ch = 1;
 	double y, z;
@@ -52,7 +52,7 @@ double RK44(double x, double tol)//Вложенный метод Рунге-Ку
 	double k4;
 	double k5;
 	double k6;
-
+	
 	while (ch)
 	{
 		ch = 0;
@@ -65,21 +65,19 @@ double RK44(double x, double tol)//Вложенный метод Рунге-Ку
 		k5 = f(x + h * (439.0 / 216.0 * k1 - 8.0 * k2 + 3680.0 / 513.0 * k3 - 845.0 / 4104.0 * k4));
 		k6 = f(x + h * (-8.0 / 27.0 * k1 + 2.0 * k2 - 3544.0 / 2565.0 * k3 + 1859.0 / 4104.0 * k4 - 11.0 / 40.0 * k5));
 
-		z =16.0 / 135.0 * h * k1 + 6656.0 / 12825.0 * h * k3 + 28561.0 / 56430.0 * h * k4 - 9.0 / 50.0 * h * k5 + 2.0 / 55.0 * h * k6;
-		y =25.0 / 216.0 * h * k1 + 1408.0 / 2565.0 * h * k3 + 2197.0 / 4104.0 * h * k4 - h * k5 / 5.0;
-
-		double error = h * abs(z - y);
-		z = x + h * k1 * 16.0 / 135.0 + h * 6656.0 / 12825.0 * k3 + h * 28561.0 / 56430.0 * k4 - h * 9.0 / 50.0 * k5 + h * 2.0 / 55.0 * k6;
-		if (abs(error / z) > tol)
+		z =  16. / 135. * k1 + 6656. / 12825. * k3 + 28561. / 56430. * k4 - 9. / 50. * k5 + 2. / 55. * k6; 
+		y =  25. / 216. * k1 + 1408. / 2565. * k3 + 2197. / 4104. * k4 - k5 / 5.;
+		double tol = max(h*z+x, h*y+x) * Rtol;
+		double error =  h*abs(z - y);
+		z = x+h*z;
+		if (error / z > Rtol)
 		{
 			ch = 1;
-			h = h * pow(tol * h / error, 1.0 / 4.0);
+			h = h * pow(tol  / error, 1.0 / 5.0);
 		}
 	}
-	return z+x;
+	return z;
 }
-
-
 
 double startF[] =
 {
@@ -161,12 +159,12 @@ int main()
 	h = 2;
 
 	bool check = 0;
-	double tol = 1;
+	
 	double mis = 1e-6;
 	cout << "RK4:1\nTrapeze:2\nRK4(5):3\nAB11:4\n";
 	int n;
 	cin >> n;
-	//freopen("a.txt", "w", stdout);
+	freopen("a.txt", "w", stdout);
 
 	switch (n)
 	{
@@ -193,17 +191,16 @@ int main()
 		cout << "calls=" << calls;
 		break;
 	case(3):
-		tol = 0.35;
 		T = E;
-		h = 1;
+		h = 16;
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
 			//cout << setprecision(8) << " " << t << " " << Target(E, t)<<" "<<T<< endl;
-			T = RK44(T, tol);
+			T = RK44(T);
 			calls++;
 		}
-		cout << "calls=" << calls << " Rtol=" << tol;
+		cout << "calls=" << calls << " Rtol=" << Rtol;
 		break;
 	case (4):
 		h = 0.0900009;

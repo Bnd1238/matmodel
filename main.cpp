@@ -7,7 +7,7 @@
 using namespace std;
 
 double h;
-double E = 54;
+double E = 64;
 double RK = E;
 double T = E;
 
@@ -52,36 +52,36 @@ double RK44(double x, double tol)//Вложенный метод Рунге-Ку
 	double k4;
 	double k5;
 	double k6;
-	
-	while(ch)
+
+	while (ch)
 	{
 		ch = 0;
 		if (f(x) == 0)
 			return 0;
 		k1 = f(x);
 		k2 = f(x + h * 1.0 / 4.0 * k1);
-		k3 = f(x + h * (3.0 / 32.0 * k1 + 9.0/ 32.0 * k2));
+		k3 = f(x + h * (3.0 / 32.0 * k1 + 9.0 / 32.0 * k2));
 		k4 = f(x + h * (1932.0 / 2197.0 * k1 - 7200.0 / 2197.0 * k2 + 7296.0 / 2197.0 * k3));
 		k5 = f(x + h * (439.0 / 216.0 * k1 - 8.0 * k2 + 3680.0 / 513.0 * k3 - 845.0 / 4104.0 * k4));
 		k6 = f(x + h * (-8.0 / 27.0 * k1 + 2.0 * k2 - 3544.0 / 2565.0 * k3 + 1859.0 / 4104.0 * k4 - 11.0 / 40.0 * k5));
-		
-		z = x + 16.0 / 13.0  * k1 +  6656.0 / 12825.0  * k3 + 28561.0 / 56430.0  * k4 - 9.0 / 50.0  * k5 + 2.0 / 55.0  * k6;
-		y = x + 25.0 / 216.0  * k1 + 1408.0 / 2565.0  * k3 + 2197.0 / 4104.0  * k4 -  k5 / 5.0;
-		
-		double error = h*abs(z - y);
+
+		z =16.0 / 135.0 * h * k1 + 6656.0 / 12825.0 * h * k3 + 28561.0 / 56430.0 * h * k4 - 9.0 / 50.0 * h * k5 + 2.0 / 55.0 * h * k6;
+		y =25.0 / 216.0 * h * k1 + 1408.0 / 2565.0 * h * k3 + 2197.0 / 4104.0 * h * k4 - h * k5 / 5.0;
+
+		double error = h * abs(z - y);
 		z = x + h * k1 * 16.0 / 135.0 + h * 6656.0 / 12825.0 * k3 + h * 28561.0 / 56430.0 * k4 - h * 9.0 / 50.0 * k5 + h * 2.0 / 55.0 * k6;
-		if (abs(error  / z) > tol)
+		if (abs(error / z) > tol)
 		{
 			ch = 1;
-			h = h * pow(tol*h / error, 1.0 / 4.0);
+			h = h * pow(tol * h / error, 1.0 / 4.0);
 		}
 	}
-	return z;
+	return z+x;
 }
 
 
 
-double startF[]=
+double startF[] =
 {
 	0,			//0
 	0,			//1
@@ -94,9 +94,10 @@ double startF[]=
 	0,			//8
 	0,			//9
 };
-long long S = 0,F=0;
 
-double gamma[]=
+long long S = 0;
+const int ORDER = 11;
+double Gamma[] =
 {
 	1.0,						//0
 	0.5 ,						//1
@@ -114,31 +115,42 @@ double gamma[]=
 double sup(int i, int n)
 {
 	if (i == 0)
-		return startF[(S+n)%10];
+		return startF[(S + n) % 10];
 	return sup(i - 1, n) - sup(i - 1, n - 1);
 }
 void starter()
 {
-	double t = 0;
+	double H = h;
+	h = h / 4.0;
+	double t = h;
+	int ch = 0;
 	T = E;
-	for (int i = 0; i < 10; ++i, t += h)
+	for (int i = 1; ch<10; ++i, t += h)
 	{
-		cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
-		startF[F%10]=f(T);
-		F++;
+		
 		T = RK4(T);
+		if (i % 4 == 0)
+		{
+			startF[ch] = f(T);
+			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
+			//cout << setprecision(8) << " " << t << " " << Target(E, t) << " " << T << endl;
+			ch++;
+		}
 	}
+	h = H;
+	cout << "---------" << endl;
 }
+
 double Adams(double x)
 {
 	double sum = 0;
-	for (int i = 0; i <10; ++i)
+	for (int i = 0; i < ORDER-1; ++i)
 	{
-		sum = sum + gamma[i] * sup(i, 9);
+		sum = sum + Gamma[i] * sup(i, ORDER-2);
 	}
 	x = x + h * sum;
-	startF[S%10] = f(x);	
-	F++;
+	startF[S % (ORDER-1)] = f(x);
+
 	S++;
 	return x;
 }
@@ -160,7 +172,7 @@ int main()
 	{
 	case(1):
 		h = 0.18;
-	
+
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
@@ -175,14 +187,14 @@ int main()
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
-			T =Trapeze(T);
+			T = Trapeze(T);
 			calls++;
 		}
 		cout << "calls=" << calls;
 		break;
 	case(3):
 		tol = 0.35;
-		T = E; 
+		T = E;
 		h = 1;
 		for (double t = 0; Target(E, t) > 1; t += h)
 		{
@@ -191,21 +203,21 @@ int main()
 			T = RK44(T, tol);
 			calls++;
 		}
-		cout << "calls=" << calls<<" Rtol="<<tol;
+		cout << "calls=" << calls << " Rtol=" << tol;
 		break;
 	case (4):
-		h = 0.005;
+		h = 0.0900009;
 		T = E;
 		starter();
-		F = 9;
-		for (double t = 10*h; Target(E, t) > 1; t += h)
+		
+		for (double t = 10 * h; Target(E, t) > 1; t += h)
 		{
 			cout << setprecision(8) << " " << t << " " << abs(Target(E, t) - T) / Target(E, t) << endl;
 			//cout << setprecision(8) << " " << t << " " << Target(E, t) << " " << T << endl;
 			T = Adams(T);
 			calls++;
 		}
-		cout << "calls:" << calls+10;
+		cout << "calls:" << calls ;
 	}
 	return 0;
 }

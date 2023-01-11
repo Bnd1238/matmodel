@@ -164,7 +164,7 @@ int main()
 	cout << "RK4:1\nTrapeze:2\nRK4(5):3\nAB11:4\n";
 	int n;
 	cin >> n;
-	freopen("a.txt", "w", stdout);
+	//freopen("a.txt", "w", stdout);
 
 	switch (n)
 	{
